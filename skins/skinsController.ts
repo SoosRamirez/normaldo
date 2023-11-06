@@ -19,16 +19,17 @@ export class SkinsController {
     async getAll(req: Request, res: Response) {
         try {
             const skins = await Skin.find()
-            res.json(skins)
+            return res.json(skins)
         } catch (e) {
             console.log(e)
+            return res.status(500).json({errors: 'Server error'})
         }
     }
 
     async addSkin(req: Request, res: Response) {
         const result = validationResult(req);
         if (!result.isEmpty()) {
-            return res.json({ errors: result.array() });
+            return res.status(400).json({ errors: result.array() });
         }
         try {
             const uniqueId = req.body.uniqueId
@@ -58,10 +59,11 @@ export class SkinsController {
                     skinnyDead: files[8].path,
                 }})
             await skin.save()
-            console.log('adding new skin')
-            res.json('success')
+            console.log(`adding new skin ${name}`)
+            return res.json('success')
         } catch (e) {
             console.log(e)
+            return res.status(500).json({ errors: 'Could not add a skin' });
         }
     }
 }

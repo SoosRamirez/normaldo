@@ -3,9 +3,12 @@
     "module": "commonjs",
     "target": "es5",
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
+    "sourceRoot": "."
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
   ]
 }

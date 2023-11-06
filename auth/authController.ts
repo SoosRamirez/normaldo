@@ -23,14 +23,14 @@ export class AuthController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Signup error', errors})
             }
-            const {username, password} = req.body
+            const {username, email, password} = req.body
             const candidate = await User.findOne({username})
             if (candidate) {
                 return res.status(400).json({message: 'User with this username already exists'})
             }
             const hashPassword = bcrypt.hashSync(password, 10)
             const userRole = await Role.findOne({value: "ADMIN"})
-            const user = new User({username, password: hashPassword, roles: [userRole.value]})
+            const user = new User({username, email: email, password: hashPassword, roles: [userRole.value]})
             await user.save()
             return res.json({message: 'User created successfully'})
         } catch (e) {
@@ -44,7 +44,7 @@ export class AuthController {
             const {username, password} = req.body
             const user = await User.findOne({username})
             if (!user) {
-                return res.status(400).json({message: `Login error. User ${username} not found `})
+                return res.status(404).json({message: `Login error. User ${username} not found `})
             }
             const validPass = bcrypt.compareSync(password, user.password)
             if (!validPass) {

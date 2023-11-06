@@ -19,6 +19,9 @@ const SkinSchema = new Schema({
         fatBite: { type: String, required: true },
         superFatBite: { type: String, required: true },
         skinnyDead: { type: String, required: true },
+    },
+    soundAssets : {
+        bite: {type: String, required: true},
     }
 })
 
