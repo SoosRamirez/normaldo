@@ -36,31 +36,19 @@ export class UserController {
                 userId: userId,
                 token: randomBytes(32).toString("hex"),
             }).save();
-            const message = `http://localhost:3000/user/verify/${userId}/${newToken.token}`;
+            const message = `http://localhost:3000/auth/verify/${userId}/${newToken.token}`;
             await sendEmail(user.email, "Verify Email", message);
             return res.send("An Email sent to your account please verify");
         } catch (error) {
             return res.status(400).send("An error occured");
         }
     }
-
-    async verify(req: Request, res: Response): Promise<Response> {
+    async getUsers(req: Request, res: Response): Promise<Response> {
         try {
-            const user = await User.findById(req.params.id);
-            if (!user) return res.status(400).send("Invalid link");
-
-            const token = await Token.findOne({
-                userId: user._id,
-                token: req.params.token,
-            });
-            if (!token) return res.status(400).send("Invalid link");
-
-            await User.updateOne({_id: user._id, confirmed: true});
-            await Token.findByIdAndRemove(token._id);
-
-            return res.send("email verified sucessfully");
-        } catch (error) {
-            res.status(400).send("An error occured");
+            const users = await User.find()
+            return res.json(users)
+        } catch (e) {
+            console.log(e)
         }
     }
 }

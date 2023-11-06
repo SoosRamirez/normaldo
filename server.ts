@@ -11,7 +11,7 @@ const app: Express = express()
 app.use(express.json())
 app.use("/auth", authRouter)
 app.use("/skins", authMiddleware, skinRouter)
-app.use("/user", userRouter)
+app.use("/user", authMiddleware, userRouter)
 
 
 

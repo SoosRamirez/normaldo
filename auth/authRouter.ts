@@ -12,6 +12,7 @@ router.post('/signup', [
     check('email', "email is required").notEmpty().isEmail()
 ], controller.signup)
 router.post('/login', controller.login)
-router.get('/users', controller.getUsers)
+router.get('/verify/:id/:token', controller.verify)
+
 
 export default router

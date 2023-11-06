@@ -1,11 +1,12 @@
-import { User } from "../models/User"
-import { Role } from "../models/Role"
+import {User} from "../models/User"
+import {Role} from "../models/Role"
 import * as bcrypt from 'bcryptjs'
 import * as jwt from "jsonwebtoken"
-import { validationResult } from "express-validator"
-import { secret } from "../config"
+import {validationResult} from "express-validator"
+import {secret} from "../config"
 import {Types} from "mongoose";
-import { Request, Response} from "express"
+import {Request, Response} from "express"
+import {Token} from "../models/Token";
 
 
 const generateAccessToken = (id: Types.ObjectId, roles: string[]) => {
@@ -58,12 +59,23 @@ export class AuthController {
         }
     }
 
-    async getUsers(req: Request, res: Response): Promise<Response> {
+    async verify(req: Request, res: Response): Promise<Response> {
         try {
-            const users = await User.find()
-            return res.json(users)
-        } catch (e) {
-            console.log(e)
+            const user = await User.findById(req.params.id);
+            if (!user) return res.status(400).send("Invalid link");
+
+            const token = await Token.findOne({
+                userId: user._id,
+                token: req.params.token,
+            });
+            if (!token) return res.status(400).send("Invalid link");
+
+            await User.updateOne({_id: user._id, confirmed: true});
+            await Token.findByIdAndRemove(token._id);
+
+            return res.send("email verified sucessfully");
+        } catch (error) {
+            res.status(400).send("An error occured");
         }
     }
 }
