@@ -1,5 +1,12 @@
 import {Schema, model} from "mongoose"
 
+export enum Rarity {
+    Common = 'common',
+    Rare = 'rare',
+    Epic = 'epic',
+    Legendary = 'legendary'
+}
+
 
 const SkinSchema = new Schema({
     uniqueId: {type: String, unique: true, required: true},

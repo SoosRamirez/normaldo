@@ -36,7 +36,7 @@ export class AuthController {
             return res.json({message: 'User created successfully'})
         } catch (e) {
             console.log(e)
-            return res.status(400).json({message: 'Signup error'})
+            return res.status(500).json({message: 'Signup error'})
         }
     }
 

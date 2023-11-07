@@ -1,4 +1,4 @@
-import {Skin} from "../models/Skin"
+import {Rarity, Skin} from "../models/Skin"
 import {Request, Response} from "express"
 import {validationResult} from "express-validator";
 
@@ -8,10 +8,13 @@ export class SkinsController {
         try {
             const uniqueId = req.body
             const skin = await Skin.findOne({uniqueId})
-            res.json(skin)
+            if (skin == null){
+                return res.status(404).json({message:'skin not found'})
+            }
+            return res.json(skin)
         } catch (e) {
             console.log(e)
-            res.status(400).json({message: 'Error getting skin'})
+            return res.status(500).json({message: 'Error getting skin'})
         }
 
     }
@@ -33,8 +36,14 @@ export class SkinsController {
         }
         try {
             const uniqueId = req.body.uniqueId
+            if (await Skin.findOne({uniqueId: uniqueId})){
+                return res.status(500).json({message: 'skin with this uniqueId already exists'})
+            }
             const name = req.body.name
             const skinRarity = req.body.skinRarity
+            if (!Object.values(Rarity).includes(skinRarity)){
+                return res.status(500).json({message: 'wrong rarity value'})
+            }
             const speed = req.body.speed
             const size = req.body.size
             const appearanceMultiplier = req.body.appearanceMultiplier

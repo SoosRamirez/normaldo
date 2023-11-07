@@ -11,11 +11,11 @@ export function roleMiddleware(roles: string[]){
         try {
             const token: string = req.headers.authorization.split(" ")[1]
             if (!token) {
-                return res.status(403).json({message: "User is not authenticate"})
+                return res.status(401).json({message: "User is not authenticate"})
             }
-            const roles  = jwt.verify(token, secret)['roles']
+            const userRoles  = jwt.verify(token, secret)['roles']
             let hasRole = false
-            for (const role of roles)  {
+            for (const role of userRoles)  {
                 if (roles.includes(role)) {
                     hasRole = true
                 }
