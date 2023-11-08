@@ -13,7 +13,7 @@ export default function authMiddleware(req: IGetUserAuthInfoRequest, res: Respon
         if (!token) {
             return res.status(401).json({message: "User is not authenticate"})
         }
-        req.user = jwt.verify(token, secret)
+        req.user = jwt.verify(token, secret)["id"].toString()
         next()
     } catch (e) {
         console.log(e)

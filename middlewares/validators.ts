@@ -10,8 +10,14 @@ export const skinValidator = [
     check('itemsSpeedMultiplier', "itemsSpeedMultiplier is empty").notEmpty(),
     check('files').custom((value, { req }) => {
         if (req.files.length < 9) {
-            throw new Error('Needed 9');
+            throw new Error(`Needed 9, got ${req.files.length}`);
         }
         return true;
     }),
+]
+
+export const authValidator = [
+    check('username', "username is empty").notEmpty(),
+    check('password', "password must be more than 6 symbols").isLength({min: 6}),
+    check('email', "email is required").notEmpty().isEmail()
 ]

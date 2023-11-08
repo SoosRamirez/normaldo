@@ -30,7 +30,7 @@ export class AuthController {
                 return res.status(400).json({message: 'User with this username already exists'})
             }
             const hashPassword = bcrypt.hashSync(password, 10)
-            const userRole = await Role.findOne({value: "ADMIN"})
+            const userRole = await Role.findOne({value: "USER"})
             const user = new User({username, email: email, password: hashPassword, roles: [userRole.value]})
             await user.save()
             return res.json({message: 'User created successfully'})
@@ -55,11 +55,11 @@ export class AuthController {
             return res.json({token})
         } catch (e) {
             console.log(e)
-            res.status(400).json({message: 'Login error'})
+            return res.status(500).json({message: 'Login error'})
         }
     }
 
-    async verify(req: Request, res: Response): Promise<Response> {
+    async verifyEmail(req: Request, res: Response): Promise<Response> {
         try {
             const user = await User.findById(req.params.id);
             if (!user) return res.status(400).send("Invalid link");
@@ -69,13 +69,11 @@ export class AuthController {
                 token: req.params.token,
             });
             if (!token) return res.status(400).send("Invalid link");
-
-            await User.updateOne({_id: user._id, confirmed: true});
+            await User.updateOne({_id: user._id}, {confirmed: true});
             await Token.findByIdAndRemove(token._id);
-
             return res.send("email verified sucessfully");
         } catch (error) {
-            res.status(400).send("An error occured");
+            return res.status(500).send("An error occured");
         }
     }
 }

@@ -6,8 +6,8 @@ import {validationResult} from "express-validator";
 export class SkinsController {
     async getOneById(req: Request, res: Response) {
         try {
-            const uniqueId = req.body
-            const skin = await Skin.findOne({uniqueId})
+            const uniqueId = req.body.uniqueId
+            const skin = await Skin.findOne({uniqueId: uniqueId})
             if (skin == null){
                 return res.status(404).json({message:'skin not found'})
             }
@@ -32,12 +32,13 @@ export class SkinsController {
     async addSkin(req: Request, res: Response) {
         const result = validationResult(req);
         if (!result.isEmpty()) {
+            console.log('error occurred over validation')
             return res.status(400).json({ errors: result.array() });
         }
         try {
             const uniqueId = req.body.uniqueId
             if (await Skin.findOne({uniqueId: uniqueId})){
-                return res.status(500).json({message: 'skin with this uniqueId already exists'})
+                return res.status(500).json({message: 'skin with this uniqueId already exists'});
             }
             const name = req.body.name
             const skinRarity = req.body.skinRarity
@@ -66,7 +67,11 @@ export class SkinsController {
                     fatBite: files[6].path,
                     superFatBite: files[7].path,
                     skinnyDead: files[8].path,
-                }})
+                },
+                soundAssets : {
+                    bite: 'hello_world'
+                }
+            })
             await skin.save()
             console.log(`adding new skin ${name}`)
             return res.json('success')

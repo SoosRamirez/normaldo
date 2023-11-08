@@ -1,19 +1,15 @@
 import {Request, Response} from "express";
-import * as jwt from "jsonwebtoken";
 import {randomBytes} from "crypto";
-import {secret} from "../config";
 import {User} from "../models/User";
 import {Token} from "../models/Token";
 import sendEmail from "./userHelpers";
+import {IGetUserAuthInfoRequest} from "../interfaces/IgetUserAuthInfoRequest";
+import {Skin} from "../models/Skin";
 
 export class UserController {
-    async getInfo(req: Request, res: Response): Promise<Response> {
+    async getInfo(req: IGetUserAuthInfoRequest, res: Response): Promise<Response> {
         try {
-            const token = req.headers.authorization.split(" ")[1]
-            if (!token) {
-                return res.status(403).json({message: "User is not authenticate"})
-            }
-            const userId = jwt.verify(token, secret)["id"]
+            const userId = req.user
             const user = await User.findById(userId)
                 .select({username: 1, dollars: 1, highScore: 1, extraLives: 1, level: 1})
                 .lean();
@@ -24,13 +20,9 @@ export class UserController {
         }
     }
 
-    async sendVerifyEmail(req: Request, res: Response): Promise<Response> {
+    async sendVerifyEmail(req: IGetUserAuthInfoRequest, res: Response): Promise<Response> {
         try {
-            const token = req.headers.authorization.split(" ")[1]
-            if (!token) {
-                return res.status(403).json({message: "User is not authenticate"})
-            }
-            const userId = jwt.verify(token, secret)["id"]
+            const userId = req.user
             const user = await User.findById(userId).select({email: 1}).lean();
             let newToken = await new Token({
                 userId: userId,
@@ -43,12 +35,30 @@ export class UserController {
             return res.status(400).send("An error occured");
         }
     }
-    async getUsers(req: Request, res: Response): Promise<Response> {
+    async obtainSkin(req: IGetUserAuthInfoRequest, res: Response):Promise<Response>{
         try {
-            const users = await User.find()
-            return res.json(users)
+            const userId = req.user
+            const skinUniqueId = req.body.skinUniqueId
+            const skin = await Skin.findOne({uniqueId: skinUniqueId})
+            if (!skin){
+                return res.status(404).json({message: 'skin not found'})
+            }
+            const user = await User.findOneAndUpdate({ _id: userId }, {"$push": { "skins": skin.uniqueId }})
+            await user.save()
+            return res.json({message: `skin ${skinUniqueId} obtained by ${user.username}`})
         } catch (e) {
             console.log(e)
+            return res.status(500).json({message: 'error occurred'})
+        }
+    }
+    async getObtained(req: IGetUserAuthInfoRequest, res: Response):Promise<Response>{
+        try{
+            const user = await User.findById(req.user)
+            const skins = await Skin.find({ uniqueId: { $in: user.skins } })
+            return res.json(skins)
+        } catch (e) {
+            console.log(e)
+            return res.status(500).json({message:'server error'})
         }
     }
 }

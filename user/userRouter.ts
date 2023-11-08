@@ -1,12 +1,12 @@
 import {Router} from "express"
 import {UserController} from "./userController";
-import {roleMiddleware} from "../middlewares/roleMiddleware";
 const router = Router();
 
 const controller = new UserController()
 
 router.get('/info', controller.getInfo)
 router.get('/sendVerifyEmail', controller.sendVerifyEmail)
-router.get('/users', roleMiddleware(['ADMIN']), controller.getUsers)
+router.post('/obtainSkin', controller.obtainSkin)
+router.get('/getObtained', controller.getObtained)
 
 export default router
