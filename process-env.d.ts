@@ -8,6 +8,8 @@ declare global {
             MONGO_USERNAME: string;
             MONGO_PASSWORD: string;
             EMAIL_HOST: string;
+            EMAIL_USERNAME: string;
+            EMAIL_PASSWORD: string;
             BASE_URL: string;
         }
     }

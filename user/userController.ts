@@ -1,4 +1,4 @@
-import {Request, Response} from "express";
+import {Response} from "express";
 import {randomBytes} from "crypto";
 import {User} from "../models/User";
 import {Token} from "../models/Token";
@@ -28,7 +28,7 @@ export class UserController {
                 userId: userId,
                 token: randomBytes(32).toString("hex"),
             }).save();
-            const message = `http://localhost:3000/auth/verify/${userId}/${newToken.token}`;
+            const message = `${process.env.BASE_URL}/auth/verify/${userId}/${newToken.token}`;
             await sendEmail(user.email, "Verify Email", message);
             return res.send("An Email sent to your account please verify");
         } catch (error) {

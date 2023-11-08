@@ -18,6 +18,6 @@ app.use("/user", authMiddleware, userRouter)
 
 
 app.listen(PORT, async () => {
-    await connect(`mongodb://soos:something@mongo:27017/?authSource=admin`);
+    await connect(`mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/?authSource=admin`);
     console.log(`Running on ${PORT} port`)
 })
