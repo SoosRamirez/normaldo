@@ -19,6 +19,8 @@ services:
     command: [ 'node', '/app/dist/server.js' ]
     deploy:
       replicas: 1
+    env_file:
+      - .env
     ports:
       - '3000:3000'
 
