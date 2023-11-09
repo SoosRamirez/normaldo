@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo
+    deploy:
+      replicas: 1
+    ports:
+      - '27017:27017'
+      - "8080:80"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: soos
+      MONGO_INITDB_ROOT_PASSWORD: something
+    volumes:
+      - mongo-data:/data/db
+  app:
+    image: node:20.6.1-alpine3.18@sha256:923cd6fac65f6892aa8bbb4208ad708c56b35f9ab86eca07ccc7b56dd28c9c77
+    volumes:
+      - .:/app
+    command: [ 'node', '/app/dist/server.js' ]
+    deploy:
+      replicas: 1
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+
+volumes:
+  mongo-data:
