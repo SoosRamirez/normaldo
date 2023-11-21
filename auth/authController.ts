@@ -7,6 +7,7 @@ import {secret} from "../config"
 import {Types} from "mongoose";
 import {Request, Response} from "express"
 import {Token} from "../models/Token";
+import creatEmail from "../user/userHelpers";
 
 
 const generateAccessToken = (id: Types.ObjectId, roles: string[]) => {
@@ -24,16 +25,19 @@ export class AuthController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Signup error', errors})
             }
-            const {username, email, password} = req.body
-            const candidate = await User.findOne({username})
+            const {nickname, email, password} = req.body
+            const candidate = await User.findOne({email})
             if (candidate) {
-                return res.status(400).json({message: 'User with this username already exists'})
+                return res.status(400).json({message: 'User with this nickname already exists'})
             }
             const hashPassword = bcrypt.hashSync(password, 10)
             const userRole = await Role.findOne({value: "USER"})
-            const user = new User({username, email: email, password: hashPassword, roles: [userRole.value]})
+            const user = new User({nickname: nickname, email: email, password: hashPassword, roles: [userRole.value]})
             await user.save()
-            return res.json({message: 'User created successfully'})
+            console.log(user._id, user.roles)
+            const token = generateAccessToken(user._id, user.roles)
+            await creatEmail(req, res, user._id.toString())
+            return res.json({token: token, user: user})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message: 'Signup error'})
@@ -42,17 +46,17 @@ export class AuthController {
 
     async login(req: Request, res: Response): Promise<Response> {
         try {
-            const {username, password} = req.body
-            const user = await User.findOne({username})
+            const {email, password} = req.body
+            const user = await User.findOne({email})
             if (!user) {
-                return res.status(404).json({message: `Login error. User ${username} not found `})
+                return res.status(404).json({message: `Login error. User ${email} not found `})
             }
             const validPass = bcrypt.compareSync(password, user.password)
             if (!validPass) {
                 return res.status(400).json({message: `Login error. Wrong password`})
             }
             const token = generateAccessToken(user._id, user.roles)
-            return res.json({token})
+            return res.json({token: token, user: user})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message: 'Login error'})
