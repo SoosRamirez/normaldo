@@ -34,10 +34,20 @@ export class AuthController {
             const userRole = await Role.findOne({value: "USER"})
             const user = new User({nickname: nickname, email: email, password: hashPassword, roles: [userRole.value]})
             await user.save()
-            console.log(user._id, user.roles)
             const token = generateAccessToken(user._id, user.roles)
             await creatEmail(req, res, user._id.toString())
-            return res.json({token: token, user: user})
+            const sendUser = await User.findById(user._id, {'nickname': 1,
+                'email': 1,
+                'confirmed': 1,
+                'roles': 1,
+                'dollars': 1,
+                'highScore': 1,
+                'extraLives': 1,
+                'level': 1,
+                'experience': 1,
+                'totalPizzas': 1,
+                'skins': 1})
+            return res.json({token: token, user: sendUser})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message: 'Signup error'})
@@ -56,7 +66,18 @@ export class AuthController {
                 return res.status(400).json({message: `Login error. Wrong password`})
             }
             const token = generateAccessToken(user._id, user.roles)
-            return res.json({token: token, user: user})
+            const sendUser = await User.findById(user._id, {'nickname': 1,
+                'email': 1,
+                'confirmed': 1,
+                'roles': 1,
+                'dollars': 1,
+                'highScore': 1,
+                'extraLives': 1,
+                'level': 1,
+                'experience': 1,
+                'totalPizzas': 1,
+                'skins': 1})
+            return res.json({token: token, user: sendUser})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message: 'Login error'})
