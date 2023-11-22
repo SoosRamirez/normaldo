@@ -1,17 +1,15 @@
 import {Response} from "express";
-import {randomBytes} from "crypto";
 import {User} from "../models/User";
-import {Token} from "../models/Token";
-import sendEmail from "./userHelpers";
 import {IGetUserAuthInfoRequest} from "../interfaces/IgetUserAuthInfoRequest";
 import {Skin} from "../models/Skin";
+import creatEmail from "./userHelpers";
 
 export class UserController {
     async getInfo(req: IGetUserAuthInfoRequest, res: Response): Promise<Response> {
         try {
             const userId = req.user
             const user = await User.findById(userId)
-                .select({username: 1, dollars: 1, highScore: 1, extraLives: 1, level: 1})
+                .select({nickname: 1, dollars: 1, highScore: 1, extraLives: 1, level: 1})
                 .lean();
             return res.status(200).json({user: user})
         } catch (e) {
@@ -22,14 +20,7 @@ export class UserController {
 
     async sendVerifyEmail(req: IGetUserAuthInfoRequest, res: Response): Promise<Response> {
         try {
-            const userId = req.user
-            const user = await User.findById(userId).select({email: 1}).lean();
-            let newToken = await new Token({
-                userId: userId,
-                token: randomBytes(32).toString("hex"),
-            }).save();
-            const message = `${process.env.BASE_URL}/auth/verify/${userId}/${newToken.token}`;
-            await sendEmail(user.email, "Verify Email", message);
+            await creatEmail(req, res, req.user)
             return res.send("An Email sent to your account please verify");
         } catch (error) {
             return res.status(400).send("An error occured");
@@ -45,7 +36,7 @@ export class UserController {
             }
             const user = await User.findOneAndUpdate({ _id: userId }, {"$push": { "skins": skin.uniqueId }})
             await user.save()
-            return res.json({message: `skin ${skinUniqueId} obtained by ${user.username}`})
+            return res.json({message: `skin ${skinUniqueId} obtained by ${user.nickname}`})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message: 'error occurred'})
@@ -56,6 +47,17 @@ export class UserController {
             const user = await User.findById(req.user)
             const skins = await Skin.find({ uniqueId: { $in: user.skins } })
             return res.json(skins)
+        } catch (e) {
+            console.log(e)
+            return res.status(500).json({message:'server error'})
+        }
+    }
+    async updateUser(req: IGetUserAuthInfoRequest, res: Response):Promise<Response> {
+        try {
+            const {updates} = req.body;
+            const user = await User.findByIdAndUpdate(req.user, { $set: updates })
+            user.save()
+            return res.json({message: 'user successfully updated'})
         } catch (e) {
             console.log(e)
             return res.status(500).json({message:'server error'})

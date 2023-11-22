@@ -17,7 +17,7 @@ export const skinValidator = [
 ]
 
 export const authValidator = [
-    check('username', "username is empty").notEmpty(),
+    check('nickname', "nickname is empty").notEmpty(),
     check('password', "password must be more than 6 symbols").isLength({min: 6}),
     check('email', "email is required").notEmpty().isEmail()
 ]
