@@ -54,7 +54,7 @@ export class AuthController {
                 'experience': 1,
                 'totalPizzas': 1,
                 'skins': 1})
-            if (sendUser){
+            if (!sendUser){
                 return res.status(500).json({message: 'Error getting created user'})
             }
             return res.json({token: token, user: sendUser})
