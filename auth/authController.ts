@@ -60,7 +60,7 @@ export class AuthController {
             return res.json({token: token, user: sendUser})
         } catch (e) {
             console.log(e)
-            return res.status(500).json({message: 'Signup error'})
+            return res.status(500).json({message: 'Signup error', error: e})
         }
     }
 
