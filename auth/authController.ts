@@ -28,10 +28,17 @@ export class AuthController {
             const {nickname, email, password} = req.body
             const candidate = await User.findOne({email})
             if (candidate) {
+                return res.status(400).json({message: 'User with this email already exists'})
+            }
+            const candidateTwo = await User.findOne({nickname})
+            if (candidateTwo) {
                 return res.status(400).json({message: 'User with this nickname already exists'})
             }
             const hashPassword = bcrypt.hashSync(password, 10)
             const userRole = await Role.findOne({value: "USER"})
+            if (!userRole){
+                return res.status(400).json({message: 'User role not found'})
+            }
             const user = new User({nickname: nickname, email: email, password: hashPassword, roles: [userRole.value]})
             await user.save()
             const token = generateAccessToken(user._id, user.roles)
@@ -47,6 +54,9 @@ export class AuthController {
                 'experience': 1,
                 'totalPizzas': 1,
                 'skins': 1})
+            if (sendUser){
+                return res.status(500).json({message: 'Error getting created user'})
+            }
             return res.json({token: token, user: sendUser})
         } catch (e) {
             console.log(e)
