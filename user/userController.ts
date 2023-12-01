@@ -87,16 +87,17 @@ export class UserController {
       const user = await User.findByIdAndUpdate(req.user, { $set: updates });
       await user.save();
       const nUser = await User.findById(req.user)
-        .select({
-          nickname: 1,
-          dollars: 1,
-          highScore: 1,
-          extraLives: 1,
-          level: 1,
-          experience: 1,
-          confirmed: 1,
-          email: 1,
-        })
+        .select({'nickname': 1,
+          'email': 1,
+          'confirmed': 1,
+          'roles': 1,
+          'dollars': 1,
+          'highScore': 1,
+          'extraLives': 1,
+          'level': 1,
+          'experience': 1,
+          'totalPizzas': 1,
+          'skins': 1})
         .lean();
       return res.json({ message: "user successfully updated", user: nUser});
     } catch (e) {
